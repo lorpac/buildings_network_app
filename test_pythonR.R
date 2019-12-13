@@ -6,12 +6,15 @@ library("reticulate")
 use_condaenv("cityenv", required = TRUE)
 
 
-py_run_file("buildings_network.py", convert = FALSE)
-# source_python("buildings_network.py", convert = FALSE)
+# py_run_file("Building.py", convert = FALSE)
+# source_python("Building.py", convert = FALSE)
+
+Building <- import("Building", convert=FALSE)
+# Building <- Building$Building
 
 point_coords <- c(45.745591, 4.871167)
 
-py$B = py$Building(point_coords=point_coords)
+py$B <- py$Building(point_coords=point_coords)
 
 py$B$download_buildings()
 py$B$plot_buildings()

@@ -21,7 +21,7 @@ from edge_assigment import assign_edges
 import os
 
 
-plt.ioff()
+# plt.ioff()
 
 # os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = 'C:/Users/Lorenza/Anaconda3/envs/cityenv/Library/plugins/platforms'
 
@@ -29,14 +29,16 @@ class Building():
     
     def __init__(self, point_coords=None, place_name=None, distance=1000):
         # gpd.geodataframe.GeoDataFrame.__init__(self)
-        if not (point_coords or place_name):
-            raise Exception("At least point_coords or place_name must be valid.")
-        else:
-            self.point_coords = point_coords
-            self.place_name = place_name
-            if self.point_coords:
-                self.distance = distance
+        self.point_coords = point_coords
+        self.place_name = place_name
+        if self.point_coords:
+            self.distance = distance
+        self.is_downloaded = False
         self.is_merged = False
+        self.nodes_assigned = False
+        self.edges_assigned = False
+        self.net_assigned = False
+
             
 
     def download_buildings(self):
@@ -46,11 +48,12 @@ class Building():
         else:
             self.buildings = ox.footprints.footprints_from_place(self.place_name)
             self.buildings = ox.project_gdf(self.buildings)
+        self.is_downloaded = True
     
     def plot_buildings(self, fc='black', ec='gray', figsize=(10, 10), imgs_folder = ".temp", filename="buildings", file_format='png', dpi=300):
         if self.is_merged:
             raise Exception("merge_and_convex() already performed on Building. Please use plot_merged_buildings()")
-        fig, ax = ox.plot_shape(B.buildings, fc=fc, ec=ec, figsize=figsize)
+        fig, ax = ox.plot_shape(self.buildings, fc=fc, ec=ec, figsize=figsize)
         ox.settings.imgs_folder = imgs_folder
         ox.save_and_show(fig, ax, save=True, show=False, close=True, filename=filename, file_format=file_format, dpi=dpi, axis_off=True)
     
@@ -89,6 +92,7 @@ class Building():
         self.nodes = self.buildings.centroid
         col = [1 for build in self.buildings] + [2 for node in self.nodes]
         self.nodes_df = gpd.GeoDataFrame(col, geometry=[build for build in self.buildings] + [node for node in self.nodes], columns=['color'])
+        self.nodes_assigned = True
 
     def assign_edges_weights(self, distance_threshold=30):
         if not self.is_merged:
@@ -107,7 +111,7 @@ class Building():
 
         self.edges_df = gpd.GeoDataFrame(colors, geometry = [build for build in self.buildings] + edges_segment + 
                             [node for node in self.nodes], columns=['color'])
-    
+        self.edges_assigned = True
     
     def plot_nodes(self, figsize=(10, 10), colors=['lightgray', 'black'], markersize=0.1, imgs_folder = ".temp", filename="nodes", file_format='png'):
         cm = ListedColormap(colors, N=len(colors))
@@ -148,6 +152,7 @@ class Building():
         self.network = G        
         self.network_df = gpd.GeoDataFrame(geometry=[build for build in self.buildings])
         self.network_pos = pos
+        self.net_assigned = True
 
     def plot_net(self, figsize=(30, 30), imgs_folder = ".temp", filename="net", file_format='png', colors = ['blue', 'cyan', 'greenyellow', 'yellow', 'orange', 'red']):
         
