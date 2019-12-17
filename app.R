@@ -20,8 +20,7 @@ ui <- fluidPage(
       verticalLayout(
         numericInput("lat", "Latitude", 45.745591),
         numericInput("long", "Longitude", 4.871167),
-        actionButton("button", "Go!"),
-        verbatimTextOutput(outputId = "status")
+        actionButton("button", "Go!")
       )
     ),
     column(
@@ -71,9 +70,6 @@ ui <- fluidPage(
 server <- function(input, output, session) {
   imgs_folder = os$path$join("www", ".temp")
   
-  rv = reactiveValues()
-  rv$status = "Ready"
-  rv$B = NA
   
   output$coordinates <-
     renderText({
@@ -83,32 +79,32 @@ server <- function(input, output, session) {
             ")")
     })
   
-  output$status <- renderPrint(rv$status)
   
   observeEvent(input$button, {
-    rv$status = "Start"
     
-    rv$B = Building$Building(point_coords = c(input$lat, input$long))
+      
+    withProgress(value = 0, message = "Creating Buildings Network", {
+
     
-    rv$status = "Downloading..."
-    cat("start downloading\n")
-    rv$B$download_buildings()
-    cat("finished downloading\n")
+    B = Building$Building(point_coords = c(input$lat, input$long))
     
-    rv$B$plot_buildings(imgs_folder = imgs_folder)
+    incProgress(1 / 6, detail = "Downloading...")
+
+    B$download_buildings()
+    
+    B$plot_buildings(imgs_folder = imgs_folder)
     
     output$buildings = renderImage({
       list(src = 'www/.temp/buildings.png',
            alt = 'Buildings',
            height = '100%')
     }, deleteFile = FALSE)
-    rv$status = "Downloaded"
     
-    rv$status = "Merging..."
-    cat("start merging\n")
-    rv$B$merge_and_convex()
-    cat("finished merging\n")
-    rv$B$plot_merged_buildings(imgs_folder = imgs_folder)
+    incProgress(2 / 6, detail = "Merging...")
+    
+
+    B$merge_and_convex()
+    B$plot_merged_buildings(imgs_folder = imgs_folder)
     
     output$merged = renderImage({
       list(src = 'www/.temp/merged.png',
@@ -116,13 +112,10 @@ server <- function(input, output, session) {
            height = '70%')
     }, deleteFile = FALSE)
     
-    rv$status = "Merged"
+    incProgress(3 / 6, detail = "Assigning nodes..")
     
-    rv$status = "Assigning nodes..."
-    cat("Assigning nodes...\n")
-    rv$B$assign_nodes()
-    cat("nodes assigned\n")
-    rv$B$plot_nodes(imgs_folder = imgs_folder)
+    B$assign_nodes()
+    B$plot_nodes(imgs_folder = imgs_folder)
     
     output$nodes = renderImage({
       list(src = 'www/.temp/nodes.png',
@@ -130,14 +123,10 @@ server <- function(input, output, session) {
            height = '70%')
     }, deleteFile = FALSE)
     
-    rv$status = "Nodes assigned"
+    incProgress(4 / 6, detail = "Assigning edges..")
     
-    
-    rv$status = "Assigning edges..."
-    cat("assigning edges...\n")
-    rv$B$assign_edges_weights()
-    cat("edges assigned\n")
-    rv$B$plot_edges(imgs_folder = imgs_folder)
+    B$assign_edges_weights()
+    B$plot_edges(imgs_folder = imgs_folder)
     
     output$edges = renderImage({
       list(src = 'www/.temp/edges.png',
@@ -145,13 +134,12 @@ server <- function(input, output, session) {
            height = '70%')
     }, deleteFile = FALSE)
     
-    rv$status = "Edges assigned"
+    status = "Edges assigned"
     
-    rv$status = "Creating network..."
-    cat("creating network\n")
-    rv$B$assign_network()
-    cat("network created\n")
-    rv$B$plot_net(imgs_folder = imgs_folder)
+    incProgress(5 / 6, detail = "Creating network...")
+
+    B$assign_network()
+    B$plot_net(imgs_folder = imgs_folder)
     
     output$net = renderImage({
       list(src = 'www/.temp/net.png',
@@ -159,8 +147,8 @@ server <- function(input, output, session) {
            height = '70%')
     }, deleteFile = FALSE)
     
-    rv$status = "Ready"
     
+    })
   })
   
   
