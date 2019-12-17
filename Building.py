@@ -21,7 +21,7 @@ from edge_assigment import assign_edges
 import os
 
 
-# plt.ioff()
+plt.ioff()
 
 # os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = 'C:/Users/Lorenza/Anaconda3/envs/cityenv/Library/plugins/platforms'
 
@@ -56,6 +56,7 @@ class Building():
         fig, ax = ox.plot_shape(self.buildings, fc=fc, ec=ec, figsize=figsize)
         ox.settings.imgs_folder = imgs_folder
         ox.save_and_show(fig, ax, save=True, show=False, close=True, filename=filename, file_format=file_format, dpi=dpi, axis_off=True)
+        fig.close()
     
     def merge_and_convex(self, buffer=0.01):
         if self.is_merged:
@@ -85,6 +86,7 @@ class Building():
         plt.tight_layout()
         os.makedirs(imgs_folder, exist_ok=True)
         plt.savefig(os.path.join(imgs_folder, filename + "." + file_format))
+        plt.close()
 
     def assign_nodes(self):
         if not self.is_merged:
@@ -121,6 +123,7 @@ class Building():
         plt.tight_layout()
         os.makedirs(imgs_folder, exist_ok=True)
         plt.savefig(os.path.join(imgs_folder, filename + "." + file_format))
+        plt.close()
 
     def plot_edges(self, figsize=(10, 10), colors=['lightgray', 'black'], markersize=1, linewidth=0.5, imgs_folder = ".temp", filename="edges", file_format='png'):
         cm = ListedColormap(colors, N=len(colors))
@@ -130,6 +133,7 @@ class Building():
         plt.tight_layout()
         os.makedirs(imgs_folder, exist_ok=True)
         plt.savefig(os.path.join(imgs_folder, filename + "." + file_format))
+        plt.close()
 
     def assign_network(self):
         G = nx.Graph()
@@ -190,6 +194,7 @@ class Building():
         plt.tight_layout()
         os.makedirs(imgs_folder, exist_ok=True)
         plt.savefig(os.path.join(imgs_folder, filename + "." + file_format))
+        plt.close()
     
 
 # point_coords = (45.745591, 4.871167) # latitude and longitude of Montplaisir-Lumière, Lyon (France)
