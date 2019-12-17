@@ -15,12 +15,15 @@ ui <- fluidPage(
   titlePanel("Buildings network"),
   
   fluidRow(
-    column(6,
-           verticalLayout(
-             numericInput("lat", "Latitude", 45.745591),
-             numericInput("long", "Longitude", 4.871167),
-             actionButton("button", "Go!")
-           )),
+    column(
+      6,
+      verticalLayout(
+        numericInput("lat", "Latitude", 45.745591),
+        numericInput("long", "Longitude", 4.871167),
+        actionButton("button", "Go!"),
+        verbatimTextOutput(outputId = "status")
+      )
+    ),
     column(
       6,
       textOutput(outputId = "coordinates"),
@@ -41,13 +44,18 @@ ui <- fluidPage(
            imageOutput(outputId = "edges")),
     column(3,
            "Create the Buildings Network",
-           imageOutput(outputId = "net")),
+           imageOutput(outputId = "net"))
   ),
   
   hr(),
   p(
     "Having fun? Try our Jupyter notebook!",
-    img(src = "GitHub_logo.png", alt = "Github_logo"),
+    img(
+      src = "GitHub_logo.png",
+      alt = "Github_logo",
+      width = "32px",
+      height = "32px"
+    ),
     a(href = "https://github.com/lorpac/building-network", "lorpac/building-network")
   ),
   br(),
@@ -63,6 +71,10 @@ ui <- fluidPage(
 server <- function(input, output, session) {
   imgs_folder = os$path$join("www", ".temp")
   
+  rv = reactiveValues()
+  rv$status = "Ready"
+  rv$B = NA
+  
   output$coordinates <-
     renderText({
       paste("Coordinates:",
@@ -71,27 +83,87 @@ server <- function(input, output, session) {
             ")")
     })
   
-  # point_coords <- reactive(c(input$lat, input$long))
+  output$status <- renderPrint(rv$status)
   
   observeEvent(input$button, {
-  
-    B = Building$Building(point_coords = c(input$lat, input$long))
+    rv$status = "Start"
     
+    rv$B = Building$Building(point_coords = c(input$lat, input$long))
+    
+    rv$status = "Downloading..."
     cat("start downloading\n")
-    B$download_buildings()
+    rv$B$download_buildings()
     cat("finished downloading\n")
     
-    B$plot_buildings(imgs_folder = imgs_folder)
+    rv$B$plot_buildings(imgs_folder = imgs_folder)
     
-    output$buildings = renderImage({list(src = 'www/.temp/buildings.png', alt = 'Buildings')}, deleteFile = FALSE)
-  
+    output$buildings = renderImage({
+      list(src = 'www/.temp/buildings.png',
+           alt = 'Buildings',
+           height = '100%')
+    }, deleteFile = FALSE)
+    rv$status = "Downloaded"
+    
+    rv$status = "Merging..."
     cat("start merging\n")
-    B$merge_and_convex()
+    rv$B$merge_and_convex()
     cat("finished merging\n")
-    B$plot_merged_buildings(imgs_folder = imgs_folder)
-
-    output$merged = renderImage({list(src = 'www/.temp/merged.png', alt = 'Merged buildings')}, deleteFile = FALSE)
+    rv$B$plot_merged_buildings(imgs_folder = imgs_folder)
+    
+    output$merged = renderImage({
+      list(src = 'www/.temp/merged.png',
+           alt = 'Merged buildings',
+           height = '70%')
+    }, deleteFile = FALSE)
+    
+    rv$status = "Merged"
+    
+    rv$status = "Assigning nodes..."
+    cat("Assigning nodes...\n")
+    rv$B$assign_nodes()
+    cat("nodes assigned\n")
+    rv$B$plot_nodes(imgs_folder = imgs_folder)
+    
+    output$nodes = renderImage({
+      list(src = 'www/.temp/nodes.png',
+           alt = 'Nodes',
+           height = '70%')
+    }, deleteFile = FALSE)
+    
+    rv$status = "Nodes assigned"
+    
+    
+    rv$status = "Assigning edges..."
+    cat("assigning edges...\n")
+    rv$B$assign_edges_weights()
+    cat("edges assigned\n")
+    rv$B$plot_edges(imgs_folder = imgs_folder)
+    
+    output$edges = renderImage({
+      list(src = 'www/.temp/edges.png',
+           alt = 'Edges',
+           height = '70%')
+    }, deleteFile = FALSE)
+    
+    rv$status = "Edges assigned"
+    
+    rv$status = "Creating network..."
+    cat("creating network\n")
+    rv$B$assign_network()
+    cat("network created\n")
+    rv$B$plot_net(imgs_folder = imgs_folder)
+    
+    output$net = renderImage({
+      list(src = 'www/.temp/net.png',
+           alt = 'Edges',
+           height = '70%')
+    }, deleteFile = FALSE)
+    
+    rv$status = "Ready"
+    
   })
+  
+  
 }
 
 shinyApp(ui = ui, server = server)
