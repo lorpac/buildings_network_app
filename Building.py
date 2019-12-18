@@ -2,7 +2,6 @@ import osmnx as ox
 import networkx as nx
 import geopandas as gpd
 import numpy as np
-# import PyQt5
 import matplotlib as mpl
 mpl.use('Agg')
 # mpl.use('wxagg', force=True) 
@@ -56,7 +55,7 @@ class Building():
         fig, ax = ox.plot_shape(self.buildings, fc=fc, ec=ec, figsize=figsize)
         ox.settings.imgs_folder = imgs_folder
         ox.save_and_show(fig, ax, save=True, show=False, close=True, filename=filename, file_format=file_format, dpi=dpi, axis_off=True)
-        fig.close()
+        plt.close()
     
     def merge_and_convex(self, buffer=0.01):
         if self.is_merged:
