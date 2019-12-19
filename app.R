@@ -6,9 +6,12 @@ library("reticulate")
 use_condaenv("cityenv", required = TRUE)
 Building <- import("Building")
 os <- import("os")
+shutil <- import("shutil")
 
 # B <- Building$Building()
 # point_coords = NA
+
+imgs_folder = os$path$join("www", ".temp")
 
 
 ui <- fluidPage(
@@ -69,10 +72,7 @@ ui <- fluidPage(
 )
 
 server <- function(input, output, session) {
-  
   session$onSessionEnded(stopApp) # stop app when closing browser tab
-  
-  imgs_folder = os$path$join("www", ".temp")
   
   output$coordinates <-
     renderText({
@@ -88,7 +88,6 @@ server <- function(input, output, session) {
   rv$nodes_num = 0
   rv$edges_num = 0
   rv$net_num = 0
-  rv$n_run = 0
   
   download <- reactive({
     rv$B$download_buildings()
@@ -120,93 +119,108 @@ server <- function(input, output, session) {
     rv$net_num = rv$net_num + 1
   })
   
-  
 
-  render_building <- reactive({output$buildings = renderImage({
-    list(src = 'www/.temp/buildings.png',
-         alt = 'Buildings',
-         height = '100%')
-  }, deleteFile = FALSE)})
+  observeEvent(rv$download_num, {
+    output$buildings = renderImage({
+      list(src = 'www/.temp/buildings.png',
+           alt = 'Buildings',
+           height = '100%')
+    }, deleteFile = FALSE)
+  }, ignoreInit = TRUE)
 
   
-  render_merged <- reactive({  output$merged = renderImage({
+  observeEvent(rv$merge_num, {
+    output$merged = renderImage({
       list(src = 'www/.temp/merged.png',
            alt = 'Merged buildings',
            height = '70%')
-    }, deleteFile = FALSE)})
+    }, deleteFile = FALSE)
+  }, ignoreInit = TRUE)
   
-
-  render_nodes <- reactive({output$nodes = renderImage({
-    list(src = 'www/.temp/nodes.png',
-         alt = 'Nodes',
-         height = '70%')
-  }, deleteFile = FALSE)})
   
-  render_edges <- reactive({output$edges = renderImage({
-    list(src = 'www/.temp/edges.png',
-         alt = 'Edges',
-         height = '70%')
-  }, deleteFile = FALSE)})
+  observeEvent(rv$nodes_num, {
+    output$nodes = renderImage({
+      list(src = 'www/.temp/nodes.png',
+           alt = 'Nodes',
+           height = '70%')
+    }, deleteFile = FALSE)
+  }, ignoreInit = TRUE)
   
-  render_net <- reactive({output$net = renderImage({
-    list(src = 'www/.temp/net.png',
-         alt = 'Edges',
-         height = '70%')
-  }, deleteFile = FALSE)})
+  observeEvent(rv$edges_num, {
+    output$edges = renderImage({
+      list(src = 'www/.temp/edges.png',
+           alt = 'Edges',
+           height = '70%')
+    }, deleteFile = FALSE)
+  }, ignoreInit = TRUE)
+  
+  observeEvent(rv$net_num, {
+    output$net = renderImage({
+      list(src = 'www/.temp/net.png',
+           alt = 'Net',
+           height = '70%')
+    }, deleteFile = FALSE)
+  }, ignoreInit = TRUE)
   
   observeEvent(input$button, {
     withProgress(value = 0, message = "Creating Buildings Network", {
-      
       rv$B = Building$Building(point_coords = c(input$lat, input$long))
       
       incProgress(detail = "Downloading...")
       download()
-      render_building()
       
       incProgress(detail = "Merging...")
       merge()
-      render_merged()
-      
+
       incProgress(detail = "Assigning nodes..")
       assign_nodes()
-      render_nodes()
-      
+
       incProgress(detail = "Assigning edges..")
       assign_edges()
-      render_edges()
-      
+
       incProgress(detail = "Creating network...")
       assign_net()
-      render_net()
-      
-      rv$n_run <- rv$n_run + 1
       
     })
-  })
-  
-  observeEvent(rv$n_run, {
+    
     if (isolate(input$save)) {
-      os$makedirs("results", exist_ok = TRUE)
+      # os$makedirs("results", exist_ok = TRUE)
       
       date <- Sys.Date()
       time <- format(Sys.time(), "%Hh%Mm%Ss")
-      coords <- isolate(paste("Lat_", input$lat, "Lon_", input$long))
       
-      destination_folder = paste(date,
-                                 "-",
-                                 time,
-                                 "-",
-                                 coords)
-      os$rename(imgs_folder,
-                os$path$join("results", destination_folder))
+      destination_folder = file.path("results", paste0(date,
+                                                      "-",
+                                                      time))
+      
+      dir.create(destination_folder, recursive = TRUE)
+      
+      
+      file_list <- list.files(imgs_folder)
+      
+      for (f in file_list){
+        file.copy(file.path(imgs_folder, f), destination_folder)
+      }
+      
+      cat(
+        paste(input$lat, input$long, sep = "\n"),
+        file = file.path(destination_folder, "coords.txt")
+      )
+      
     }
-    else {
-      os$remove(results_folder)
-    }
+    # else {
+    #   os$remove(imgs_folder)
+    # }
     
   }, ignoreInit = TRUE)
   
   
+  
+  
 }
 
+# onStop(function() {os$remove(imgs_folder)})
+
 shinyApp(ui = ui, server = server)
+
+# os$remove(imgs_folder)
