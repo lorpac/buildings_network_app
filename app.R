@@ -3,6 +3,7 @@
 
 library("shiny")
 library("reticulate")
+library("leaflet")
 use_condaenv("cityenv", required = TRUE)
 Building <- import("Building")
 os <- import("os")
@@ -14,26 +15,27 @@ shutil <- import("shutil")
 imgs_folder = os$path$join("www", ".temp")
 
 
-ui <- fluidPage(
-  titlePanel("Buildings network"),
-  
-  fluidRow(
-    column(
-      6,
-      verticalLayout(
-        numericInput("lat", "Latitude", 45.745591),
-        numericInput("long", "Longitude", 4.871167),
-        actionButton("button", "Go!"),
-        checkboxInput("save", "Save results", TRUE)
-      )
-    ),
-    column(
-      6,
-      textOutput(outputId = "coordinates"),
-      imageOutput(outputId = "buildings")
-    )
-    
+ui <- fluidPage(titlePanel("Buildings network"),
+                
+                fluidRow(column(4, wellPanel(
+                  verticalLayout(fluidRow(
+                    column(8,
+                           verticalLayout(
+                             numericInput("lat", "Latitude", 45.745591),
+                             numericInput("long", "Longitude", 4.871167)
+                           )),
+                    column(
+                      2,
+                      verticalLayout(actionButton("button", "Go!")),
+                      checkboxInput("save", "Save results", TRUE)
+                    )
+                  ),
+                  leafletOutput("map"))
+                )), 
+    column(8, textOutput(outputId = "coordinates"),
+           imageOutput(outputId = "buildings"))
   ),
+
   
   fluidRow(
     column(3,
@@ -78,9 +80,35 @@ server <- function(input, output, session) {
     renderText({
       paste("Coordinates:",
             "(",
-            paste(input$lat, input$long, sep = ", "),
+            paste(rv$lat, rv$lng, sep = ", "),
             ")")
     })
+  
+  output$map <- renderLeaflet({
+    leaflet() %>%
+      addProviderTiles(providers$CartoDB.Voyager,
+                       options = providerTileOptions(noWrap = TRUE)) %>%
+      setView(lng = rv$lng,
+              lat = rv$lat,
+              zoom = 15) %>%
+      # addCircleMarkers( ~ longitude, ~ latitude)
+      addMarkers(lng = rv$lng,
+                 lat = rv$lat) %>%
+      # addRectangles(lng1 = rv$lng - 0.01,
+      #               lat1 = rv$lat - 0.01,
+      #               lng2 = rv$lng + 0.01,
+      #               lat2 = rv$lat + 0.01) %>%
+      addScaleBar()
+  })
+  
+  observeEvent(input$map_click, {
+    click = input$map_click
+    rv$lat <- click$lat
+    rv$lng <- click$lng
+    updateTextInput(session, "lat", value = rv$lat)
+    updateTextInput(session, "long", value = rv$lng)
+    # leafletProxy('map') %>% setView(lat = input$map_center$lat, lng = input$map_center$lng, zoom = input$map_zoom) # avoid re-centering
+  })
   
   rv <- reactiveValues()
   rv$download_num = 0
@@ -88,6 +116,12 @@ server <- function(input, output, session) {
   rv$nodes_num = 0
   rv$edges_num = 0
   rv$net_num = 0
+  rv$lat <- isolate({
+    input$lat
+  })
+  rv$lng <- isolate({
+    input$long
+  })
   
   download <- reactive({
     rv$B$download_buildings()
@@ -119,15 +153,15 @@ server <- function(input, output, session) {
     rv$net_num = rv$net_num + 1
   })
   
-
+  
   observeEvent(rv$download_num, {
     output$buildings = renderImage({
       list(src = 'www/.temp/buildings.png',
            alt = 'Buildings',
-           height = '100%')
+           height = '70%')
     }, deleteFile = FALSE)
   }, ignoreInit = TRUE)
-
+  
   
   observeEvent(rv$merge_num, {
     output$merged = renderImage({
@@ -171,13 +205,13 @@ server <- function(input, output, session) {
       
       incProgress(detail = "Merging...")
       merge()
-
+      
       incProgress(detail = "Assigning nodes..")
       assign_nodes()
-
+      
       incProgress(detail = "Assigning edges..")
       assign_edges()
-
+      
       incProgress(detail = "Creating network...")
       assign_net()
       
@@ -190,15 +224,15 @@ server <- function(input, output, session) {
       time <- format(Sys.time(), "%Hh%Mm%Ss")
       
       destination_folder = file.path("results", paste0(date,
-                                                      "-",
-                                                      time))
+                                                       "-",
+                                                       time))
       
       dir.create(destination_folder, recursive = TRUE)
       
       
       file_list <- list.files(imgs_folder)
       
-      for (f in file_list){
+      for (f in file_list) {
         file.copy(file.path(imgs_folder, f), destination_folder)
       }
       
