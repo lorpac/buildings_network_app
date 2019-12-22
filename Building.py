@@ -3,7 +3,6 @@ import networkx as nx
 import geopandas as gpd
 import numpy as np
 import matplotlib as mpl
-mpl.use('Agg')
 # mpl.use('wxagg', force=True) 
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
@@ -194,30 +193,3 @@ class Building():
         os.makedirs(imgs_folder, exist_ok=True)
         plt.savefig(os.path.join(imgs_folder, filename + "." + file_format))
         plt.close()
-    
-
-# point_coords = (45.745591, 4.871167) # latitude and longitude of Montplaisir-Lumière, Lyon (France)
-# B = Building(point_coords=point_coords)
-# print("start download")
-# B.download_buildings()
-# print("ok download")
-# B.plot_buildings()
-
-# print("start merge")
-# B.merge_and_convex()
-# print(("ok merge"))
-# B.plot_merged_buildings()
-
-# B.assign_nodes()
-# print("nodes assigned")
-# B.plot_nodes()
-
-# B.assign_edges_weights()
-# print("edges assigned")
-# B.plot_edges()
-
-# B.assign_network()
-# print("network assigned")
-# B.plot_net()
-
-

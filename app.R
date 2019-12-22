@@ -2,65 +2,51 @@
 # install.packages("reticulate", dependencies = TRUE)
 
 library("shiny")
-library("reticulate")
 library("leaflet")
-use_condaenv("cityenv", required = TRUE)
-Building <- import("Building")
-os <- import("os")
-shutil <- import("shutil")
 
-# B <- Building$Building()
-# point_coords = NA
-
-imgs_folder = os$path$join("www", ".temp")
-
+imgs_folder = "www/.temp"
 
 ui <- fluidPage(
   titlePanel("Buildings network"),
   
-  fluidRow(column(4, wellPanel(
-    verticalLayout(fluidRow(
-      column(8,
-             verticalLayout(
-               numericInput("lat", "Latitude", 45.745591),
-               numericInput("long", "Longitude", 4.871167)
-             )),
-      column(
-        2,
-        verticalLayout(actionButton("button", "Go!")),
-        checkboxInput("save", "Save results", TRUE)
-      )
-    ),
-    leafletOutput("map"))
-  )),
-  column(
-    4,
-    textOutput(outputId = "coordinates"),
-    imageOutput(outputId = "buildings")
-  )),
+  fluidRow(
+    column(4, wellPanel(
+      verticalLayout(fluidRow(
+        column(8,
+               verticalLayout(
+                 numericInput("lat", "Latitude", 45.745591),
+                 numericInput("long", "Longitude", 4.871167)
+               )),
+        column(
+          2,
+          verticalLayout(actionButton("button", "Go!")),
+          checkboxInput("save", "Save results", TRUE)
+        )
+      ),
+      leafletOutput("map"))
+    )),
+    column(
+      4,
+      textOutput(outputId = "status"),
+      textOutput(outputId = "coordinates"),
+      imageOutput(outputId = "buildings")
+    )
+  ),
   
   
   fluidRow(
-    column(
-      3,
-      "Merge buildings",
-      imageOutput(outputId = "merged")
-    ),
-    column(
-      3,
-      "Assign nodes",
-      imageOutput(outputId = "nodes")
-    ),
-    column(
-      3,
-      "Assign edges",
-      imageOutput(outputId = "edges")
-    ),
-    column(
-      3,
-      "Create the Buildings Network",
-      imageOutput(outputId = "net")
-    )
+    column(3,
+           "Merge buildings",
+           imageOutput(outputId = "merged")),
+    column(3,
+           "Assign nodes",
+           imageOutput(outputId = "nodes")),
+    column(3,
+           "Assign edges",
+           imageOutput(outputId = "edges")),
+    column(3,
+           "Create the Buildings Network",
+           imageOutput(outputId = "net"))
   ),
   
   hr(),
@@ -79,9 +65,6 @@ ui <- fluidPage(
     "This app and the Python code ... ... ",
     strong("Is the code open source? Please cite blablabla")
   )
-  
-  
-  
 )
 
 server <- function(input, output, session) {
@@ -134,132 +117,120 @@ server <- function(input, output, session) {
     input$long
   })
   
-  
-  download <- reactive({
-    rv$B$download_buildings()
-    rv$B$plot_buildings(imgs_folder = imgs_folder)
-    rv$download_src = 'www/.temp/buildings.png'
-    rv$download_src
-    system2("Rscript", "download.R", wait = FALSE)
-  })
-  
-  merge <- reactive({
-    rv$B$merge_and_convex()
-    rv$B$plot_merged_buildings(imgs_folder = imgs_folder)
-    rv$merge_src = 'www/.temp/merged.png'
-    system2("Rscript", "merge.R", wait = FALSE)
-  })
-  
-  assign_nodes <- reactive({
-    rv$B$assign_nodes()
-    rv$B$plot_nodes(imgs_folder = imgs_folder)
-    rv$nodes_src = 'www/.temp/nodes.png'
-  })
-  
-  assign_edges <- reactive({
-    rv$B$assign_edges_weights()
-    rv$B$plot_edges(imgs_folder = imgs_folder)
-    rv$edges_src = 'www/.temp/edges.png'
-  })
-  
-  assign_net <- reactive({
-    rv$B$assign_network()
-    rv$B$plot_net(imgs_folder = imgs_folder)
-    rv$net_src = 'www/.temp/net.png'
-  })
-  
-  
   output$buildings = renderImage({
     list(src = rv$download_src,
-         alt = 'Buildings', height = '100%')
+         alt = 'Buildings',
+         height = '100%')
   }, deleteFile = FALSE)
   
   output$merged = renderImage({
     list(src = rv$merge_src,
-         alt = 'Merged buildings', height = '70%')
+         alt = 'Merged buildings',
+         height = '70%')
   }, deleteFile = FALSE)
   
   output$nodes = renderImage({
     list(src = rv$nodes_src,
-         alt = 'Nodes', height = '70%')
+         alt = 'Nodes',
+         height = '70%')
   }, deleteFile = FALSE)
   
   output$edges = renderImage({
     list(src = rv$edges_src,
-         alt = 'Edges', height = '70%')
+         alt = 'Edges',
+         height = '70%')
   }, deleteFile = FALSE)
   
   output$net = renderImage({
     list(src = rv$net_src,
-         alt = 'Net', height = '70%')
+         alt = 'Net',
+         height = '70%')
   }, deleteFile = FALSE)
   
-  observeEvent(input$button, {
+  rv$status = reactiveFileReader(100, session, "status", readLines)
+  
+  observeEvent(rv$status(), {
+    status = strtoi(isolate({
+      rv$status()
+    }))
     
-    rv$download_src = "www/sb.png"
-    rv$merge_src = "www/sb.png"
-    rv$nodes_src = "www/sb.png"
-    rv$edges_src = "www/sb.png"
-    rv$net_src = "www/sb.png"
+    output$status = renderText(rv$status_text)
     
-    withProgress(value = 0, message = "Creating Buildings Network", {
-      rv$B = Building$Building(point_coords = c(input$lat, input$long))
-      
-      incProgress(detail = "Downloading...")
-      download()
-      
-      incProgress(detail = "Merging...")
-      merge()
-
-      incProgress(detail = "Assigning nodes..")
-      assign_nodes()
-
-      incProgress(detail = "Assigning edges..")
-      assign_edges()
-
-      incProgress(detail = "Creating network...")
-      assign_net()
-
-    })
+    if (status == 0) {
+      rv$download_src = "www/sb.png"
+      rv$merge_src = "www/sb.png"
+      rv$nodes_src = "www/sb.png"
+      rv$edges_src = "www/sb.png"
+      rv$net_src = "www/sb.png"
+      rv$status_text = "Downloading buildings..."
+    }
     
-    if (isolate(input$save)) {
-      # os$makedirs("results", exist_ok = TRUE)
+    if (status > 0) {
+      rv$download_src = paste0(imgs_folder, "/buildings.png")
+      rv$status_text = "Merging buildings..."
+    }
+    if (status > 1) {
+      rv$merge_src = paste0(imgs_folder, "/merged.png")
+      rv$status_text = "Assigning nodes..."
+    }
+    if (status > 2) {
+      rv$nodes_src = paste0(imgs_folder, "/nodes.png")
+      rv$status_text = "Assigning edges..."
+    }
+    if (status > 3) {
+      rv$edges_src = paste0(imgs_folder, "/edges.png")
+      rv$status_text = "Creating network..."
+    }
+    if (status > 4) {
+      rv$net_src = paste0(imgs_folder, "/net.png")
+      rv$status_text = "Finished."
       
-      date <- Sys.Date()
-      time <- format(Sys.time(), "%Hh%Mm%Ss")
-      
-      destination_folder = file.path("results", paste0(date,
-                                                       "-",
-                                                       time))
-      
-      dir.create(destination_folder, recursive = TRUE)
-      
-      
-      file_list <- list.files(imgs_folder)
-      
-      for (f in file_list) {
-        file.copy(file.path(imgs_folder, f), destination_folder)
+      if (isolate(input$save)) {
+        date <- Sys.Date()
+        time <- format(Sys.time(), "%Hh%Mm%Ss")
+        
+        destination_folder = file.path("results", paste0(date,
+                                                         "-",
+                                                         time))
+        
+        dir.create(destination_folder, recursive = TRUE)
+        
+        
+        file_list <- list.files(imgs_folder)
+        
+        for (f in file_list) {
+          file.copy(file.path(imgs_folder, f), destination_folder)
+        }
+        
+        cat(
+          paste(input$lat, input$long, sep = "\n"),
+          file = file.path(destination_folder, "coords.txt")
+        )
+        
       }
       
-      cat(
-        paste(input$lat, input$long, sep = "\n"),
-        file = file.path(destination_folder, "coords.txt")
-      )
       
     }
-    # else {
-    #   os$remove(imgs_folder)
-    # }
-    
   }, ignoreInit = TRUE)
   
   
-  
-  
+  observeEvent(input$button, {
+    args = c("/c",
+             "run.ps1",
+             "-lat",
+             isolate(rv$lat),
+             "-lng",
+             isolate(rv$lng))
+    
+    system2("powershell", args, wait = FALSE)
+    
+    
+    
+  }, ignoreInit = TRUE)
 }
 
-# onStop(function() {os$remove(imgs_folder)})
+onStop(function() {
+  unlink(imgs_folder, recursive = TRUE)
+})
 
 shinyApp(ui = ui, server = server)
-
-# os$remove(imgs_folder)
