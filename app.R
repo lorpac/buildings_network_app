@@ -15,41 +15,52 @@ shutil <- import("shutil")
 imgs_folder = os$path$join("www", ".temp")
 
 
-ui <- fluidPage(titlePanel("Buildings network"),
-                
-                fluidRow(column(4, wellPanel(
-                  verticalLayout(fluidRow(
-                    column(8,
-                           verticalLayout(
-                             numericInput("lat", "Latitude", 45.745591),
-                             numericInput("long", "Longitude", 4.871167)
-                           )),
-                    column(
-                      2,
-                      verticalLayout(actionButton("button", "Go!")),
-                      checkboxInput("save", "Save results", TRUE)
-                    )
-                  ),
-                  leafletOutput("map"))
-                )), 
-    column(8, textOutput(outputId = "coordinates"),
-           imageOutput(outputId = "buildings"))
-  ),
-
+ui <- fluidPage(
+  titlePanel("Buildings network"),
+  
+  fluidRow(column(4, wellPanel(
+    verticalLayout(fluidRow(
+      column(8,
+             verticalLayout(
+               numericInput("lat", "Latitude", 45.745591),
+               numericInput("long", "Longitude", 4.871167)
+             )),
+      column(
+        2,
+        verticalLayout(actionButton("button", "Go!")),
+        checkboxInput("save", "Save results", TRUE)
+      )
+    ),
+    leafletOutput("map"))
+  )),
+  column(
+    4,
+    textOutput(outputId = "coordinates"),
+    imageOutput(outputId = "buildings")
+  )),
+  
   
   fluidRow(
-    column(3,
-           "Merge buildings",
-           imageOutput(outputId = "merged")),
-    column(3,
-           "Assign nodes",
-           imageOutput(outputId = "nodes")),
-    column(3,
-           "Assign edges",
-           imageOutput(outputId = "edges")),
-    column(3,
-           "Create the Buildings Network",
-           imageOutput(outputId = "net"))
+    column(
+      3,
+      "Merge buildings",
+      imageOutput(outputId = "merged")
+    ),
+    column(
+      3,
+      "Assign nodes",
+      imageOutput(outputId = "nodes")
+    ),
+    column(
+      3,
+      "Assign edges",
+      imageOutput(outputId = "edges")
+    ),
+    column(
+      3,
+      "Create the Buildings Network",
+      imageOutput(outputId = "net")
+    )
   ),
   
   hr(),
@@ -111,11 +122,11 @@ server <- function(input, output, session) {
   })
   
   rv <- reactiveValues()
-  rv$download_num = 0
-  rv$merge_num = 0
-  rv$nodes_num = 0
-  rv$edges_num = 0
-  rv$net_num = 0
+  rv$download_src = "www/sb.png"
+  rv$merge_src = "www/sb.png"
+  rv$nodes_src = "www/sb.png"
+  rv$edges_src = "www/sb.png"
+  rv$net_src = "www/sb.png"
   rv$lat <- isolate({
     input$lat
   })
@@ -123,80 +134,74 @@ server <- function(input, output, session) {
     input$long
   })
   
+  
   download <- reactive({
     rv$B$download_buildings()
     rv$B$plot_buildings(imgs_folder = imgs_folder)
-    rv$download_num = rv$download_num + 1
+    rv$download_src = 'www/.temp/buildings.png'
+    rv$download_src
+    system2("Rscript", "download.R", wait = FALSE)
   })
   
   merge <- reactive({
     rv$B$merge_and_convex()
     rv$B$plot_merged_buildings(imgs_folder = imgs_folder)
-    rv$merge_num = rv$merge_num + 1
+    rv$merge_src = 'www/.temp/merged.png'
+    system2("Rscript", "merge.R", wait = FALSE)
   })
   
   assign_nodes <- reactive({
     rv$B$assign_nodes()
     rv$B$plot_nodes(imgs_folder = imgs_folder)
-    rv$nodes_num = rv$nodes_num + 1
+    rv$nodes_src = 'www/.temp/nodes.png'
   })
   
   assign_edges <- reactive({
     rv$B$assign_edges_weights()
     rv$B$plot_edges(imgs_folder = imgs_folder)
-    rv$edges_num = rv$edges_num + 1
+    rv$edges_src = 'www/.temp/edges.png'
   })
   
   assign_net <- reactive({
     rv$B$assign_network()
     rv$B$plot_net(imgs_folder = imgs_folder)
-    rv$net_num = rv$net_num + 1
+    rv$net_src = 'www/.temp/net.png'
   })
   
   
-  observeEvent(rv$download_num, {
-    output$buildings = renderImage({
-      list(src = 'www/.temp/buildings.png',
-           alt = 'Buildings',
-           height = '70%')
-    }, deleteFile = FALSE)
-  }, ignoreInit = TRUE)
+  output$buildings = renderImage({
+    list(src = rv$download_src,
+         alt = 'Buildings', height = '100%')
+  }, deleteFile = FALSE)
   
+  output$merged = renderImage({
+    list(src = rv$merge_src,
+         alt = 'Merged buildings', height = '70%')
+  }, deleteFile = FALSE)
   
-  observeEvent(rv$merge_num, {
-    output$merged = renderImage({
-      list(src = 'www/.temp/merged.png',
-           alt = 'Merged buildings',
-           height = '70%')
-    }, deleteFile = FALSE)
-  }, ignoreInit = TRUE)
+  output$nodes = renderImage({
+    list(src = rv$nodes_src,
+         alt = 'Nodes', height = '70%')
+  }, deleteFile = FALSE)
   
+  output$edges = renderImage({
+    list(src = rv$edges_src,
+         alt = 'Edges', height = '70%')
+  }, deleteFile = FALSE)
   
-  observeEvent(rv$nodes_num, {
-    output$nodes = renderImage({
-      list(src = 'www/.temp/nodes.png',
-           alt = 'Nodes',
-           height = '70%')
-    }, deleteFile = FALSE)
-  }, ignoreInit = TRUE)
-  
-  observeEvent(rv$edges_num, {
-    output$edges = renderImage({
-      list(src = 'www/.temp/edges.png',
-           alt = 'Edges',
-           height = '70%')
-    }, deleteFile = FALSE)
-  }, ignoreInit = TRUE)
-  
-  observeEvent(rv$net_num, {
-    output$net = renderImage({
-      list(src = 'www/.temp/net.png',
-           alt = 'Net',
-           height = '70%')
-    }, deleteFile = FALSE)
-  }, ignoreInit = TRUE)
+  output$net = renderImage({
+    list(src = rv$net_src,
+         alt = 'Net', height = '70%')
+  }, deleteFile = FALSE)
   
   observeEvent(input$button, {
+    
+    rv$download_src = "www/sb.png"
+    rv$merge_src = "www/sb.png"
+    rv$nodes_src = "www/sb.png"
+    rv$edges_src = "www/sb.png"
+    rv$net_src = "www/sb.png"
+    
     withProgress(value = 0, message = "Creating Buildings Network", {
       rv$B = Building$Building(point_coords = c(input$lat, input$long))
       
@@ -205,16 +210,16 @@ server <- function(input, output, session) {
       
       incProgress(detail = "Merging...")
       merge()
-      
+
       incProgress(detail = "Assigning nodes..")
       assign_nodes()
-      
+
       incProgress(detail = "Assigning edges..")
       assign_edges()
-      
+
       incProgress(detail = "Creating network...")
       assign_net()
-      
+
     })
     
     if (isolate(input$save)) {
