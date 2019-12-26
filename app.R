@@ -105,11 +105,11 @@ server <- function(input, output, session) {
   })
   
   rv <- reactiveValues()
-  rv$download_src = "www/sb.png"
-  rv$merge_src = "www/sb.png"
-  rv$nodes_src = "www/sb.png"
-  rv$edges_src = "www/sb.png"
-  rv$net_src = "www/sb.png"
+  rv$download_src = "www/placeholder.png"
+  rv$merge_src = "www/placeholder.png"
+  rv$nodes_src = "www/placeholder.png"
+  rv$edges_src = "www/placeholder.png"
+  rv$net_src = "www/placeholder.png"
   rv$lat <- isolate({
     input$lat
   })
@@ -157,11 +157,11 @@ server <- function(input, output, session) {
     output$status = renderText(rv$status_text)
     
     if (status == 0) {
-      rv$download_src = "www/sb.png"
-      rv$merge_src = "www/sb.png"
-      rv$nodes_src = "www/sb.png"
-      rv$edges_src = "www/sb.png"
-      rv$net_src = "www/sb.png"
+      rv$download_src = "www/placeholder.png"
+      rv$merge_src = "www/placeholder.png"
+      rv$nodes_src = "www/placeholder.png"
+      rv$edges_src = "www/placeholder.png"
+      rv$net_src = "www/placeholder.png"
       rv$status_text = "Downloading buildings..."
     }
     
