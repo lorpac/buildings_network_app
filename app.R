@@ -215,14 +215,30 @@ server <- function(input, output, session) {
   
   
   observeEvent(input$button, {
-    args = c("/c",
-             "run.ps1",
-             "-lat",
-             isolate(rv$lat),
-             "-lng",
-             isolate(rv$lng))
+    if (Sys.info()["sysname"] == "Windows")
+    {
+      args = c("/c",
+               "run.ps1",
+               "-lat",
+               isolate(rv$lat),
+               "-lng",
+               isolate(rv$lng))
+      system2("powershell", args, wait = FALSE)
+    }
     
-    system2("powershell", args, wait = FALSE)
+    else {
+      args = c("run.sh",
+               isolate(rv$lat),
+               isolate(rv$lng))
+      
+      system2("bash", args, wait = FALSE)
+    } # not working with wait=FALSE
+    
+    
+    # args = c( "main.py",
+    #          toString(isolate(rv$lat)),
+    #          toString(isolate(rv$lng)))
+    # system2(".env/bin/python", args, wait=TRUE) # can't execute binary file
     
     
     

@@ -8,8 +8,6 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 import matplotlib.patches as patches
 from matplotlib.colors import ListedColormap
-mpl.rc('text', usetex=False)  # tex not working on windows with R
-plt.rcParams.update({'font.size': 22})
 import shapely
 from shapely import speedups
 if speedups.available:
@@ -18,10 +16,7 @@ import sec
 from edge_assigment import assign_edges
 import os
 
-
 plt.ioff()
-
-# os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = 'C:/Users/Lorenza/Anaconda3/envs/cityenv/Library/plugins/platforms'
 
 class Building():
     
