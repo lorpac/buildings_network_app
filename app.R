@@ -20,7 +20,7 @@ ui <- fluidPage(
         column(4, numericInput("long", "Longitude", 4.871167)),
         column(
           2,
-          checkboxInput("Save", "Save", TRUE),
+          checkboxInput("save", "Save", TRUE),
           actionButton(
             "button",
             "Run",
