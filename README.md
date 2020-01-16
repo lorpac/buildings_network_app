@@ -44,7 +44,7 @@ In MacOS or Linux, the app uses a Python virtual environment .env. First, you ne
 
 ```
 pip install virtualenv
-python -m venv .env
+python2 -m venv .env
 source .env/bin/activate
 ```
 
