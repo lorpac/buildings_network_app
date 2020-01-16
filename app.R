@@ -4,60 +4,91 @@
 library("shiny")
 library("leaflet")
 
+# The icons have been downloaded from "Font Awesome" under the Creative Commons licence (https://fontawesome.com/license)
+
 imgs_folder = "www/.temp"
+
+box_style = "background-color:#F5F5F5; padding: 1px 1px; text-align:center"
 
 ui <- fluidPage(
   titlePanel("Buildings network"),
-  
-  fluidRow(
-    column(4, wellPanel(
-      verticalLayout(fluidRow(
-        column(8,
-               verticalLayout(
-                 numericInput("lat", "Latitude", 45.745591),
-                 numericInput("long", "Longitude", 4.871167)
-               )),
+  h5(textOutput(outputId = "status"), style = "font-family: Courier New"),
+  fluidRow(column(4,  wellPanel(
+    verticalLayout(
+      fluidRow(
+        column(4, numericInput("lat", "Latitude", 45.745591)),
+        column(4, numericInput("long", "Longitude", 4.871167)),
         column(
           2,
-          verticalLayout(actionButton("button", "Go!")),
-          checkboxInput("save", "Save results", TRUE)
+          checkboxInput("Save", "Save", TRUE),
+          actionButton(
+            "button",
+            "Run",
+            style = "font-size : large; color: #28a428",
+            icon = icon("play", lib = "font-awesome")
+          )
         )
+        
       ),
-      leafletOutput("map"))
-    )),
-    column(
-      4,
-      textOutput(outputId = "status"),
-      textOutput(outputId = "coordinates"),
+      br(),
+      leafletOutput("map")
+    )
+  )),
+  column(
+    4,
+    # h3(textOutput(outputId = "coordinates")),
+    
+    div(
+      style = box_style ,
+      h4("Download buildings"),
+      br(),
       imageOutput(outputId = "buildings")
     )
+    
   ),
+  column(
+    4,
+    div(
+      style = box_style,
+      h4("Merge buildings"),
+      br(),
+      imageOutput(outputId = "merged")
+    )
+  ),),
   
   
-  fluidRow(
-    column(3,
-           "Merge buildings",
-           imageOutput(outputId = "merged")),
-    column(3,
-           "Assign nodes",
-           imageOutput(outputId = "nodes")),
-    column(3,
-           "Assign edges",
-           imageOutput(outputId = "edges")),
-    column(3,
-           "Create the Buildings Network",
-           imageOutput(outputId = "net"))
+  fluidRow(column(
+    4,
+    div(
+      style = box_style,
+      h4("Assign nodes"),
+      br(),
+      imageOutput(outputId = "nodes")
+    )
   ),
+  column(
+    4,
+    div(
+      style = box_style,
+      h4("Assign edges"),
+      br(),
+      imageOutput(outputId = "edges")
+    )
+  ),
+  column(
+    4,
+    div(
+      style = box_style,
+      h4("Create the Buildings Network"),
+      br(),
+      imageOutput(outputId = "net")
+    )
+  ),),
   
   hr(),
   p(
     "Having fun? Try our Jupyter notebook!",
-    img(
-      src = "GitHub_logo.png",
-      alt = "Github_logo",
-      width = "32px",
-      height = "32px"
-    ),
+    a(href = "https://github.com/lorpac/building-network", icon("github", lib = "font-awesome"), style = "color : initial"),
     a(href = "https://github.com/lorpac/building-network", "lorpac/building-network")
   ),
   br(),
@@ -105,6 +136,7 @@ server <- function(input, output, session) {
   })
   
   rv <- reactiveValues()
+  rv$status_text = "Ready"
   rv$download_src = "www/placeholder.png"
   rv$merge_src = "www/placeholder.png"
   rv$nodes_src = "www/placeholder.png"
@@ -126,35 +158,36 @@ server <- function(input, output, session) {
   output$merged = renderImage({
     list(src = rv$merge_src,
          alt = 'Merged buildings',
-         height = '70%')
+         height = '100%')
   }, deleteFile = FALSE)
   
   output$nodes = renderImage({
     list(src = rv$nodes_src,
          alt = 'Nodes',
-         height = '70%')
+         height = '100%')
   }, deleteFile = FALSE)
   
   output$edges = renderImage({
     list(src = rv$edges_src,
          alt = 'Edges',
-         height = '70%')
+         height = '100%')
   }, deleteFile = FALSE)
   
   output$net = renderImage({
     list(src = rv$net_src,
          alt = 'Net',
-         height = '70%')
+         height = '100%')
   }, deleteFile = FALSE)
   
   rv$status = reactiveFileReader(100, session, "status", readLines)
+  output$status = renderText(paste("Status:", rv$status_text))
   
   observeEvent(rv$status(), {
     status = strtoi(isolate({
       rv$status()
     }))
     
-    output$status = renderText(rv$status_text)
+    
     
     if (status == 0) {
       rv$download_src = "www/placeholder.png"
@@ -209,6 +242,8 @@ server <- function(input, output, session) {
         
       }
       
+      Sys.sleep(3)
+      rv$status_text = "Ready"
       
     }
   }, ignoreInit = TRUE)
