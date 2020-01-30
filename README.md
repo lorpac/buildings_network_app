@@ -57,11 +57,13 @@ please note that the dependency [rtree](https://pypi.org/project/Rtree/) require
 
 ## Create your Building Network
 
-In order to create the Building Network, move the blue square in the map to select the area of interest and click the button "Go!". Alternatively, you can directly insert the geographical coordinates of the center of your are of interest in the (Latitude, Longitude) boxes and click the button "Go!". The area used for the creation of the Buildings Network is a 2km x 2km square.
+- Run app.R, RStudio  will launch.
+- Click "run App". It is then advised to open the app in your browser (click "Open in browser").
+- Move the blue square in the map to select the area of interest and click the button "Go!". Alternatively, you can directly insert the geographical coordinates of the center of your are of interest in the (Latitude, Longitude) boxes and click the button "Go!". The area used for the creation of the Buildings Network is a 2km x 2km square.
 
 ## Retrieve the results
 
-If "save results" is checked before running the analysis (that's the default behavior), you will find a copy of the produced pictures (buildings footprint, merged buildings, Buildings Network), together with a text file containing the values of the input coordinates, in a subdirectory of the  `results` folder, named from the day and time at which the analysis was run.
+If "save results" is checked before running the analysis (that's the default behavior), you will find a copy of the produced pictures (buildings footprint, merged buildings, Buildings Network), together with a text file containing the values of the input coordinates (center of the square area), in a subdirectory of the  `results` folder, named from the day and time at which the analysis was run.
 
 ## Authors
 
