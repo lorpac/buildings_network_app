@@ -57,7 +57,7 @@ please note that the dependency [rtree](https://pypi.org/project/Rtree/) require
 
 ## Create your Building Network
 
-In order to create the Building Network, simply choose the geographical coordinates of a point to be used as center of a 2km x 2km area by clicking on the map or by directly inserting the coordinates in the (Latitude, Longitude) boxes and click on the button "Go!".
+In order to create the Building Network, move the blue square in the map to select the area of interest and click the button "Go!". Alternatively, you can directly insert the geographical coordinates of the center of your are of interest in the (Latitude, Longitude) boxes and click the button "Go!". The area used for the creation of the Buildings Network is a 2km x 2km square.
 
 ## Retrieve the results
 
@@ -66,3 +66,8 @@ If "save results" is checked before running the analysis (that's the default beh
 ## Authors
 
 - Lorenza Pacini - [lorpac](https://github.com/lorpac)
+
+### Known issues (work in progress!)
+
+- The blue square in the map is deformed at latitudes far from the European latitude. However, this does not impact the shape of the area that is actually considered for the creation of the Buildings Network, it remains a 2km x 2km squared area centered around the center of the (deformed) square.
+- On Linux, the results are plotted only when the whole computation has finished. 

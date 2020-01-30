@@ -12,7 +12,7 @@ box_style = "background-color:#F5F5F5; padding: 1px 1px; text-align:center"
 
 ui <- fluidPage(
   titlePanel("Buildings network"),
-  h5(textOutput(outputId = "status"), style = "font-family: Courier New"),
+  h5(textOutput(outputId = "status"), style = "font-family: Lucida Console; font-size : large; color: #1b61e4; text-align: center"),
   fluidRow(column(4,  wellPanel(
     verticalLayout(
       fluidRow(
@@ -90,11 +90,6 @@ ui <- fluidPage(
     "Having fun? Try our Jupyter notebook!",
     a(href = "https://github.com/lorpac/building-network", icon("github", lib = "font-awesome"), style = "color : initial"),
     a(href = "https://github.com/lorpac/building-network", "lorpac/building-network")
-  ),
-  br(),
-  p(
-    "This app and the Python code ... ... ",
-    strong("Is the code open source? Please cite blablabla")
   )
 )
 
@@ -110,30 +105,39 @@ server <- function(input, output, session) {
     })
   
   output$map <- renderLeaflet({
-    leaflet() %>%
+    leaflet(options = leafletOptions(minZoom = 0, maxZoom = 18)) %>%
       addProviderTiles(providers$CartoDB.Voyager,
                        options = providerTileOptions(noWrap = TRUE)) %>%
       setView(lng = rv$lng,
               lat = rv$lat,
-              zoom = 15) %>%
-      # addCircleMarkers( ~ longitude, ~ latitude)
-      addMarkers(lng = rv$lng,
-                 lat = rv$lat) %>%
-      # addRectangles(lng1 = rv$lng - 0.01,
-      #               lat1 = rv$lat - 0.01,
-      #               lng2 = rv$lng + 0.01,
-      #               lat2 = rv$lat + 0.01) %>%
+              zoom = rv$zoom) %>%
+      # addMarkers(lng = rv$lng,
+      #            lat = rv$lat) %>%
+      
+      # conversion km to lat and long (in Lyon) from http://www.csgnetwork.com/degreelenllavcalc.html
+      addRectangles(lng1 = rv$lng - 1 / 77.817524427469,
+                    lat1 = rv$lat - 1 / 111.14631466252709,
+                    lng2 = rv$lng + 1 / 77.817524427469,
+                    lat2 = rv$lat + 1 / 111.14631466252709, fillOpacity = 0.05) %>%
       addScaleBar()
   })
   
-  observeEvent(input$map_click, {
-    click = input$map_click
-    rv$lat <- click$lat
-    rv$lng <- click$lng
+  observeEvent(input$map_center, {
+    center = input$map_center
+    rv$lat <- center$lat
+    rv$lng <- center$lng
+    rv$zoom <- input$map_zoom
     updateTextInput(session, "lat", value = rv$lat)
     updateTextInput(session, "long", value = rv$lng)
-    # leafletProxy('map') %>% setView(lat = input$map_center$lat, lng = input$map_center$lng, zoom = input$map_zoom) # avoid re-centering
   })
+  # observeEvent(input$map_click, {
+  #   click = input$map_click
+  #   rv$lat <- click$lat
+  #   rv$lng <- click$lng
+  #   updateTextInput(session, "lat", value = rv$lat)
+  #   updateTextInput(session, "long", value = rv$lng)
+  #   # leafletProxy('map') %>% setView(lat = input$map_center$lat, lng = input$map_center$lng, zoom = input$map_zoom) # avoid re-centering
+  # })
   
   rv <- reactiveValues()
   rv$status_text = "Ready"
@@ -148,6 +152,7 @@ server <- function(input, output, session) {
   rv$lng <- isolate({
     input$long
   })
+  rv$zoom <- 13
   
   output$buildings = renderImage({
     list(src = rv$download_src,
