@@ -91,8 +91,8 @@ ui <- fluidPage(
     a(href = "https://github.com/lorpac/building-network", icon("github", lib = "font-awesome"), style = "color : initial"),
     a(href = "https://github.com/lorpac/building-network", "lorpac/building-network"),
     br(),
-    "For suggestions and questions: ",
-    a(href = "mailto:lorenza.pacini@univ-lyon1.fr", "lorenza.pacini@univ-lyon1.fr")
+    "For suggestions and questions contact ",
+    a(href = "mailto:lorenza.pacini@univ-lyon1.fr", "Lorenza Pacini")
     
   )
   
