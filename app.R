@@ -3,6 +3,7 @@
 
 library("shiny")
 library("leaflet")
+library("comprehenr")
 
 # The icons have been downloaded from "Font Awesome" under the Creative Commons licence (https://fontawesome.com/license)
 
@@ -12,7 +13,16 @@ box_style = "background-color:#F5F5F5; padding: 1px 1px; text-align:center"
 
 ui <- fluidPage(
   titlePanel("Buildings network"),
-  h5(textOutput(outputId = "status"), style = "font-family: Lucida Console; font-size : large; color: #1b61e4; text-align: center"),
+  
+  
+  fluidRow(column(4, wellPanel(
+    textInput("name", "Job name", "BuildingsNetwork"))),        
+    column(4, h5(textOutput(outputId = "status"), style = "font-family: Lucida Console; font-size : large; color: #1b61e4; text-align: center")
+      ),
+    column(4,
+      downloadButton("downloadData", label = "Download"))
+    ),
+  
   fluidRow(column(4,  wellPanel(
     verticalLayout(
       fluidRow(
@@ -54,7 +64,7 @@ ui <- fluidPage(
       br(),
       imageOutput(outputId = "merged")
     )
-  ),),
+  )),
   
   
   fluidRow(column(
@@ -83,7 +93,7 @@ ui <- fluidPage(
       br(),
       imageOutput(outputId = "net")
     )
-  ),),
+  )),
   
   hr(),
   p(
@@ -206,6 +216,13 @@ server <- function(input, output, session) {
       rv$edges_src = "www/placeholder.png"
       rv$net_src = "www/placeholder.png"
       rv$status_text = "Downloading buildings..."
+      rv$date <- Sys.Date()
+      rv$time <- format(Sys.time(), "%Hh%Mm%Ss")
+      rv$folder_name <- paste0(input$name,
+                               "-",
+                               rv$date,
+                               "-",
+                               rv$time)
     }
     
     if (status > 0) {
@@ -227,22 +244,17 @@ server <- function(input, output, session) {
     if (status > 4) {
       rv$net_src = paste0(imgs_folder, "/net.png")
       rv$status_text = "Finished."
+      rv$file_list <- list.files(imgs_folder)
+      rv$file_paths <- to_vec(for(f in rv$file_list) file.path(imgs_folder, f))
       
       if (isolate(input$save)) {
-        date <- Sys.Date()
-        time <- format(Sys.time(), "%Hh%Mm%Ss")
         
-        destination_folder = file.path("results", paste0(date,
-                                                         "-",
-                                                         time))
+        destination_folder = file.path("results", rv$folder_name)
         
         dir.create(destination_folder, recursive = TRUE)
         
-        
-        file_list <- list.files(imgs_folder)
-        
-        for (f in file_list) {
-          file.copy(file.path(imgs_folder, f), destination_folder)
+        for (f in rv$file_paths) {
+          file.copy(f, destination_folder)
         }
         
         cat(
@@ -287,7 +299,21 @@ server <- function(input, output, session) {
     
     
     
-  }, ignoreInit = TRUE)
+  }
+  , ignoreInit = TRUE)
+  
+  output$downloadData <- downloadHandler(
+    filename <- function(){
+      paste(rv$folder_name, "tar", sep=".")
+      },
+    
+    # content <- function(file) {
+    #   tar(file, rv$file_paths)
+    # }
+    content <- function(file) {
+      tar(file, imgs_folder)
+    }
+    )
 }
 
 onStop(function() {
