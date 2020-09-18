@@ -3,8 +3,22 @@
 An R Shiny app that allows creating the Building Network of a 2km x 2km square area of any city, around a user-defined geographical point. 
 
 ## Requirements and installation
-First, you need to install R (and RStudio).
-The calculations are donw in Python. You need to install Python (version 3.x) and install the required packages (essentially, [OSMnx](https://github.com/gboeing/osmnx) with its dependencies, see below). 
+First, you need to install R (and RStudio). The following R packages have to be installed:
+- shiny
+- leaflet
+- comprehenr
+
+You can istall them by typing 
+
+``
+install.packages("shiny", dependencies = TRUE)
+install.packages("leaflet", dependencies = TRUE)
+install.packages("comprehenr", dependencies = TRUE)
+``
+
+in the R console.
+
+The calculations are done in Python. You need to install Python (version 3.x) and install the required packages (essentially, [OSMnx](https://github.com/gboeing/osmnx) with its dependencies, see below). 
 ### Installation on Windows
 Due to geopandas installation requirement, installing with conda is required on Windows.
 
