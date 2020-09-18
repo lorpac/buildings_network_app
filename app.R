@@ -263,7 +263,7 @@ server <- function(input, output, session) {
     if (Sys.info()["sysname"] == "Windows")
     {
       args = c("/c",
-               "run.ps1",
+               "./run.ps1",
                "-lat",
                isolate(rv$lat),
                "-lng",
