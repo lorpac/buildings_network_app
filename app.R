@@ -95,6 +95,17 @@ ui <- fluidPage(
     )
   )),
   
+  br(),
+  fluidRow(column(
+    4,
+    div(
+      style = box_style,
+      h4("Color Buildings"),
+      br(),
+      imageOutput(outputId = "colored_buildings")
+    )
+  )),
+  
   hr(),
   p(
     "Having fun? Try our Jupyter notebook!",
@@ -161,6 +172,7 @@ server <- function(input, output, session) {
   rv$nodes_src = "www/placeholder.png"
   rv$edges_src = "www/placeholder.png"
   rv$net_src = "www/placeholder.png"
+  rv$buildings_color_src = "www/placeholder.png"
   rv$lat <- isolate({
     input$lat
   })
@@ -195,7 +207,13 @@ server <- function(input, output, session) {
   
   output$net = renderImage({
     list(src = rv$net_src,
-         alt = 'Net',
+         alt = 'Network',
+         height = '100%')
+  }, deleteFile = FALSE)
+  
+  output$colored_buildings = renderImage({
+    list(src = rv$buildings_color_src,
+         alt = 'Colored Buildings',
          height = '100%')
   }, deleteFile = FALSE)
   
@@ -215,6 +233,7 @@ server <- function(input, output, session) {
       rv$nodes_src = "www/placeholder.png"
       rv$edges_src = "www/placeholder.png"
       rv$net_src = "www/placeholder.png"
+      rv$buildings_color_src = "www/placeholder.png"
       rv$status_text = "Downloading buildings..."
       rv$date <- Sys.Date()
       rv$time <- format(Sys.time(), "%Hh%Mm%Ss")
@@ -243,6 +262,10 @@ server <- function(input, output, session) {
     }
     if (status > 4) {
       rv$net_src = paste0(imgs_folder, "/net.png")
+      rv$status_text = "Coloring buildings..."
+    }
+    if (status > 5) {
+      rv$buildings_color_src = paste0(imgs_folder, "/buildings_color.png")
       rv$status_text = "Finished."
       rv$file_list <- list.files(imgs_folder)
       rv$file_paths <- to_vec(for(f in rv$file_list) file.path(imgs_folder, f))

@@ -40,3 +40,6 @@ update_status(4)
 B.assign_network()
 B.plot_net(imgs_folder = imgs_folder)
 update_status(5)
+
+B.plot_buildings_color(imgs_folder = imgs_folder)
+update_status(6)

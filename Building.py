@@ -150,31 +150,43 @@ class Building():
         self.network_df = gpd.GeoDataFrame(geometry=[build for build in self.buildings])
         self.network_pos = pos
         self.net_assigned = True
+        self.assign_node_color()
 
-    def plot_net(self, figsize=(30, 30), imgs_folder = ".temp", filename="net", file_format='png', colors = ['blue', 'cyan', 'greenyellow', 'yellow', 'orange', 'red']):
-        
+    def assign_node_color(self, colors = ['blue', 'cyan', 'greenyellow', 'yellow', 'orange', 'red']):
         G = self.network
-    
-        neigh_watch_sharp = []
+        neigh_watch_sharp_dict = {}
+        node_color = []
         for index, node in enumerate(G.nodes):
             k = nx.degree(G, node)
             w = nx.degree(G, node, weight='weight')
             nw = w / k
             
             if nw < 500:
-                neigh_watch_sharp.append(1)
+                neigh_watch_sharp_dict[node] = 0
+                node_color.append(colors[0])
             elif nw < 1000:
-                neigh_watch_sharp.append(2)
+                neigh_watch_sharp_dict[node] = 1
+                node_color.append(colors[1])
             elif nw < 1500:
-                neigh_watch_sharp.append(3)
+                neigh_watch_sharp_dict[node] = 2
+                node_color.append(colors[2])
             elif nw < 2000:
-                neigh_watch_sharp.append(4)
+                neigh_watch_sharp_dict[node] = 3
+                node_color.append(colors[3])
             elif nw < 2500:
-                neigh_watch_sharp.append(5)
+                neigh_watch_sharp_dict[node] = 4
+                node_color.append(colors[4])
             else:
-                neigh_watch_sharp.append(6)
+                neigh_watch_sharp_dict[node] = 5
+                node_color.append(colors[5])
+        self.node_color = node_color
+        self.neigh_watch_sharp_dict = neigh_watch_sharp_dict
+        self.colors = colors
 
-        node_color = [colors[value - 1] for value in neigh_watch_sharp]
+    def plot_net(self, figsize=(30, 30), imgs_folder = ".temp", filename="net", file_format='png'):
+        
+        G = self.network
+        node_color = self.node_color
         
         weights_values = [self.weights[(u, v)] for u, v in G.edges]
         
@@ -187,4 +199,31 @@ class Building():
         plt.tight_layout()
         os.makedirs(imgs_folder, exist_ok=True)
         plt.savefig(os.path.join(imgs_folder, filename + "." + file_format))
-        plt.close()
+        plt.close() 
+
+    def plot_buildings_color(self, figsize=(30, 30), imgs_folder = ".temp", filename="buildings_color",
+        file_format='png'):
+            
+            G = self.network
+            node_color = self.node_color
+            colors = self.colors
+            neigh_watch_sharp_dict = self.neigh_watch_sharp_dict
+            buildings_df = self.buildings_df
+
+            cm = ListedColormap(colors, N=len(colors))
+            buildings_df_colors = gpd.GeoDataFrame(columns=['geometry', 'nw_sharp'])
+            for i, row in buildings_df.iterrows():
+                if i in G.nodes:
+                    nw_sharp = neigh_watch_sharp_dict[i]
+                    geometry = row['geometry']
+                    buildings_df_colors.loc[i] = [geometry, nw_sharp] 
+            fig, ax = plt.subplots(figsize=figsize)
+            base = buildings_df.plot(ax=ax, color='gray', alpha=0.2)
+            buildings_df_colors.plot(ax=base, column='nw_sharp', cmap=cm, vmin=0,
+                                vmax=5)
+            buildings_df_colors.boundary.plot(ax=base, color='k')
+            ax.axis('off')
+
+            plt.tight_layout()
+            plt.savefig(os.path.join(imgs_folder, filename + "." + file_format))
+            plt.show()
