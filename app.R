@@ -4,6 +4,7 @@
 library("shiny")
 library("leaflet")
 library("comprehenr")
+library("markdown")
 
 # The icons have been downloaded from "Font Awesome" under the Creative Commons licence (https://fontawesome.com/license)
 
@@ -12,39 +13,48 @@ imgs_folder = "www/.temp"
 box_style = "background-color:#F5F5F5; padding: 1px 1px; text-align:center"
 
 ui <- fluidPage(
-  titlePanel("Buildings network"),
-  
-  
-  fluidRow(column(4, wellPanel(
-    textInput("name", "Job name", "BuildingsNetwork"))),        
-    column(4, h5(textOutput(outputId = "status"), style = "font-family: Lucida Console; font-size : large; color: #1b61e4; text-align: center")
-      ),
-    column(4,
-      downloadButton("downloadData", label = "Download"))
-    ),
-  
-  fluidRow(column(4,  wellPanel(
-    verticalLayout(
-      fluidRow(
-        column(4, numericInput("lat", "Latitude", 45.745591)),
-        column(4, numericInput("long", "Longitude", 4.871167)),
-        column(
-          2,
-          checkboxInput("save", "Save", TRUE),
-          actionButton(
-            "button",
-            "Run",
-            style = "font-size : large; color: #28a428",
-            icon = icon("play", lib = "font-awesome")
-          )
-        )
-        
-      ),
-      br(),
-      leafletOutput("map")
-    )
+  # titlePanel("Buildings network"),
+  fluidRow(column(
+    12,
+    h3(textOutput(outputId = "status"), style = "font-family: Lucida Console; color: #1b61e4; text-align: center"),
+    align="center"
   )),
-  column(
+  
+  fluidRow(
+  column(6,
+           wellPanel(includeMarkdown("www/intro.md"))
+  ),
+  column(6, verticalLayout(
+    wellPanel(
+      textInput("name", "Job name", "BuildingsNetwork")
+    ),
+    wellPanel(
+      verticalLayout(
+        fluidRow(
+          column(4, numericInput("lat", "Latitude", 45.745591)),
+          column(4, numericInput("long", "Longitude", 4.871167)),
+          column(
+            4,
+            fluidRow(column(6, checkboxInput("save", "Save results", TRUE), align="center"),
+                     column(6, actionButton(
+                       "button",
+                       "Run",
+                       style = "font-size : medium; color: #28a428",
+                       icon = icon("play", lib = "font-awesome")
+                     ), align="left"))
+            )
+          
+        ),
+        br(),
+        leafletOutput("map")
+      )
+    ))
+    
+    
+  )),
+
+  
+  fluidRow(column(
     4,
     # h3(textOutput(outputId = "coordinates")),
     
@@ -54,7 +64,6 @@ ui <- fluidPage(
       br(),
       imageOutput(outputId = "buildings")
     )
-    
   ),
   column(
     4,
@@ -64,10 +73,9 @@ ui <- fluidPage(
       br(),
       imageOutput(outputId = "merged")
     )
-  )),
+  ),
   
-  
-  fluidRow(column(
+  column(
     4,
     div(
       style = box_style,
@@ -75,8 +83,9 @@ ui <- fluidPage(
       br(),
       imageOutput(outputId = "nodes")
     )
-  ),
-  column(
+  )),
+  br(),
+  fluidRow(column(
     4,
     div(
       style = box_style,
@@ -93,10 +102,8 @@ ui <- fluidPage(
       br(),
       imageOutput(outputId = "net")
     )
-  )),
-  
-  br(),
-  fluidRow(column(
+  ),
+  column(
     4,
     div(
       style = box_style,
@@ -105,11 +112,21 @@ ui <- fluidPage(
       imageOutput(outputId = "colored_buildings")
     )
   )),
+  br(),
+  
+  fluidRow(column(
+    12,
+    downloadButton("downloadData", label = "Download"), align = "center"
+  )),
   
   hr(),
   p(
     "Having fun? Try our Jupyter notebook!",
-    a(href = "https://github.com/lorpac/building-network", icon("github", lib = "font-awesome"), style = "color : initial"),
+    a(
+      href = "https://github.com/lorpac/building-network",
+      icon("github", lib = "font-awesome"),
+      style = "color : initial"
+    ),
     a(href = "https://github.com/lorpac/building-network", "lorpac/building-network"),
     br(),
     "For suggestions and questions contact ",
@@ -141,10 +158,13 @@ server <- function(input, output, session) {
       #            lat = rv$lat) %>%
       
       # conversion km to lat and long (in Lyon) from http://www.csgnetwork.com/degreelenllavcalc.html
-      addRectangles(lng1 = rv$lng - 1 / 77.817524427469,
-                    lat1 = rv$lat - 1 / 111.14631466252709,
-                    lng2 = rv$lng + 1 / 77.817524427469,
-                    lat2 = rv$lat + 1 / 111.14631466252709, fillOpacity = 0.05) %>%
+      addRectangles(
+        lng1 = rv$lng - 1 / 77.817524427469,
+        lat1 = rv$lat - 1 / 111.14631466252709,
+        lng2 = rv$lng + 1 / 77.817524427469,
+        lat2 = rv$lat + 1 / 111.14631466252709,
+        fillOpacity = 0.05
+      ) %>%
       addScaleBar()
   })
   
@@ -212,9 +232,11 @@ server <- function(input, output, session) {
   }, deleteFile = FALSE)
   
   output$colored_buildings = renderImage({
-    list(src = rv$buildings_color_src,
-         alt = 'Colored Buildings',
-         height = '100%')
+    list(
+      src = rv$buildings_color_src,
+      alt = 'Colored Buildings',
+      height = '100%'
+    )
   }, deleteFile = FALSE)
   
   rv$status = reactiveFileReader(100, session, "status", readLines)
@@ -268,10 +290,11 @@ server <- function(input, output, session) {
       rv$buildings_color_src = paste0(imgs_folder, "/buildings_color.png")
       rv$status_text = "Finished."
       rv$file_list <- list.files(imgs_folder)
-      rv$file_paths <- to_vec(for(f in rv$file_list) file.path(imgs_folder, f))
+      rv$file_paths <-
+        to_vec(for (f in rv$file_list)
+          file.path(imgs_folder, f))
       
       if (isolate(input$save)) {
-        
         destination_folder = file.path("results", rv$folder_name)
         
         dir.create(destination_folder, recursive = TRUE)
@@ -325,18 +348,16 @@ server <- function(input, output, session) {
   }
   , ignoreInit = TRUE)
   
-  output$downloadData <- downloadHandler(
-    filename <- function(){
-      paste(rv$folder_name, "tar", sep=".")
-      },
-    
-    # content <- function(file) {
-    #   tar(file, rv$file_paths)
-    # }
-    content <- function(file) {
-      tar(file, imgs_folder)
-    }
-    )
+  output$downloadData <- downloadHandler(filename <- function() {
+    paste(rv$folder_name, "tar", sep = ".")
+  },
+  
+  # content <- function(file) {
+  #   tar(file, rv$file_paths)
+  # }
+  content <- function(file) {
+    tar(file, imgs_folder)
+  })
 }
 
 onStop(function() {
