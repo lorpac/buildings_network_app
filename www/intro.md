@@ -2,8 +2,9 @@
 
 ### How to run the calculation
  - You can give your job a name using the **Job name** field. The default job name is *BuildingsNetwork*.
- - Move the blue square in the map to select the area of interest and click the button **Run**. Alternatively, you can directly insert the geographical coordinates of the center of your are of interest in the (Latitude, Longitude) boxes and click the button **Run**.
- - The area used for the creation of the Buildings Network is a 2km x 2km square.
+ - Move the blue square in the map to select the area of interest and click the button **Run**. Alternatively, you can directly insert the geographical coordinates of the center of your are of interest in the (Latitude, Longitude) boxes and click the button **Run**. It is also possible to search for places by clicking on the magnifying glass icon in the map.
+
+The area used for the creation of the Buildings Network is a 2km x 2km square.
 
 ### How to retrieve the results
 - If **Save results** is checked before running the analysis (that's the default behavior), you will find a copy of the produced pictures (buildings footprint, merged buildings, Buildings Network, colored network), together with a text file containing the values of the input coordinates (center of the square area), in a subdirectory of the  `results/` folder, named from the job name and the day and time at which the analysis was run.

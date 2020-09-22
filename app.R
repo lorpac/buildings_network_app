@@ -3,6 +3,7 @@
 
 library("shiny")
 library("leaflet")
+library("leaflet.extras")
 library("comprehenr")
 library("markdown")
 
@@ -147,13 +148,12 @@ server <- function(input, output, session) {
             ")")
     })
   
+  
+  observe(
   output$map <- renderLeaflet({
     leaflet(options = leafletOptions(minZoom = 0, maxZoom = 18)) %>%
       addProviderTiles(providers$CartoDB.Voyager,
                        options = providerTileOptions(noWrap = TRUE)) %>%
-      setView(lng = rv$lng,
-              lat = rv$lat,
-              zoom = rv$zoom) %>%
       # addMarkers(lng = rv$lng,
       #            lat = rv$lat) %>%
       
@@ -165,8 +165,21 @@ server <- function(input, output, session) {
         lat2 = rv$lat + 1 / 111.14631466252709,
         fillOpacity = 0.05
       ) %>%
-      addScaleBar()
+      addScaleBar() %>%
+      addSearchOSM(options = searchOptions(autoCollapse = FALSE)) %>%
+      setView(lng = rv$lng,
+            lat = rv$lat,
+            zoom = rv$zoom)
   })
+  )
+  
+  observeEvent(input$lat, {
+    rv$lat <- input$lat
+  })
+  observeEvent(input$long, {
+    rv$lng <- input$long
+  })
+  
   
   observeEvent(input$map_center, {
     center = input$map_center
@@ -184,6 +197,8 @@ server <- function(input, output, session) {
   #   updateTextInput(session, "long", value = rv$lng)
   #   # leafletProxy('map') %>% setView(lat = input$map_center$lat, lng = input$map_center$lng, zoom = input$map_zoom) # avoid re-centering
   # })
+  
+ 
   
   rv <- reactiveValues()
   rv$status_text = "Ready"
