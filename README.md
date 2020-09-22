@@ -77,11 +77,11 @@ please note that the dependency [rtree](https://pypi.org/project/Rtree/) require
 
 ## Retrieve the results
 
-If **save results** is checked before running the analysis (that's the default behavior), you will find a copy of the produced pictures (buildings footprint, merged buildings, Buildings Network), together with a text file containing the values of the input coordinates (center of the square area), in a subdirectory of the  `results/` folder, named from the day and time at which the analysis was run.
+If **save results** is checked before running the analysis (that's the default behavior), you will find a copy of the produced pictures (buildings footprint, merged buildings, Buildings Network, colored network), together with a text file containing the values of the input coordinates (center of the square area), in a subdirectory of the  `results/` folder, named from the day and time at which the analysis was run. You can also download the results by clicking on **Download** once the calculation has finished.
 
-## Authors
+## Author
 
-- Lorenza Pacini - [lorpac](https://github.com/lorpac)
+Lorenza Pacini - [lorpac](https://github.com/lorpac)
 
 ### Known issues (work in progress!)
 
