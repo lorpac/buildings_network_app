@@ -16,6 +16,6 @@ If you use the Buildings Network in your work, please cite
 
 ### Going further
 
-If you want to customize the size of the geographical area, produce the Buildings Network of a whole city, or retrieve the graph of the Buildings Network for analysis, please use our **BuildingsNetwork Jupyter notebook** available at <i class="fa fa-github" aria-hidden="true"></i> [lorpac/building-network]("https://github.com/lorpac/building-network").
+If you want to customize the size of the geographical area, produce the Buildings Network of a whole city, or retrieve the graph of the Buildings Network for analysis, please use our **BuildingsNetwork Jupyter notebook** available at <i class="fa fa-github" aria-hidden="true"></i> [lorpac/building-network](https://github.com/lorpac/building-network).
 
 For any questions and suggestion, please write to  `lorenza.pacini AT univ-lyon1.fr`
