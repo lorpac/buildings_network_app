@@ -15,11 +15,11 @@ box_style = "background-color:#F5F5F5; padding: 1px 1px; text-align:center"
 
 ui <- fluidPage(
   # titlePanel("Buildings network"),
-  fluidRow(column(
-    12,
-    h3(textOutput(outputId = "status"), style = "font-family: Lucida Console; color: #1b61e4; text-align: center"),
-    align="center"
-  )),
+  br(),
+  absolutePanel(class = "panel panel-default", style = "opacity: 0.9; z-index: 10;", fixed=TRUE, right= 20, left="auto", top=5, bottom="auto", width = 300, 
+    
+    h4(textOutput(outputId = "status"), style = "font-family: Lucida Console; color: #1b61e4; text-align: center")
+  ),
   
   fluidRow(
   column(6,
@@ -128,10 +128,7 @@ ui <- fluidPage(
       icon("github", lib = "font-awesome"),
       style = "color : initial"
     ),
-    a(href = "https://github.com/lorpac/building-network", "lorpac/building-network"),
-    br(),
-    "For suggestions and questions contact ",
-    a(href = "mailto:lorenza.pacini@univ-lyon1.fr", "Lorenza Pacini")
+    a(href = "https://github.com/lorpac/building-network", "lorpac/building-network")
     
   )
   
@@ -189,16 +186,7 @@ server <- function(input, output, session) {
     updateTextInput(session, "lat", value = rv$lat)
     updateTextInput(session, "long", value = rv$lng)
   })
-  # observeEvent(input$map_click, {
-  #   click = input$map_click
-  #   rv$lat <- click$lat
-  #   rv$lng <- click$lng
-  #   updateTextInput(session, "lat", value = rv$lat)
-  #   updateTextInput(session, "long", value = rv$lng)
-  #   # leafletProxy('map') %>% setView(lat = input$map_center$lat, lng = input$map_center$lng, zoom = input$map_zoom) # avoid re-centering
-  # })
   
- 
   
   rv <- reactiveValues()
   rv$status_text = "Ready"
@@ -255,7 +243,7 @@ server <- function(input, output, session) {
   }, deleteFile = FALSE)
   
   rv$status = reactiveFileReader(100, session, "status", readLines)
-  output$status = renderText(paste("Status:", rv$status_text))
+  output$status = renderText(rv$status_text)
   
   observeEvent(rv$status(), {
     status = strtoi(isolate({
