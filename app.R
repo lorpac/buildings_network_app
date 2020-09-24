@@ -16,9 +16,9 @@ box_style = "background-color:#F5F5F5; padding: 1px 1px; text-align:center"
 ui <- fluidPage(
   # titlePanel("Buildings network"),
   br(),
-  absolutePanel(class = "panel panel-default", style = "opacity: 0.9; z-index: 10;", fixed=TRUE, right= 20, left="auto", top=5, bottom="auto", width = 300, 
+  absolutePanel(class = "panel panel-default", style = "opacity: 0.9; z-index: 10;", fixed=TRUE, right=0, left="auto", top=0, bottom="auto", width = 300, 
     
-    h4(textOutput(outputId = "status"), style = "font-family: Lucida Console; color: #1b61e4; text-align: center")
+    h5(textOutput(outputId = "status"), style = "font-family: Lucida Console; color: #1b61e4; text-align: center")
   ),
   
   fluidRow(
