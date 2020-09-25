@@ -66,23 +66,35 @@ python3 -m virtualenv .env
 source .env/bin/activate
 ```
 
+Note: if you get a `ModuleNotFoundError`, try `python3 -m venv .env`.
+
 Please note that the OSMnx dependency [rtree](https://pypi.org/project/Rtree/) requires the [libspatialindex](https://libspatialindex.org/) library, that is not installed authomatically. If you don't have it installed, please run:
 
 ```
 sudo apt-get install libspatialindex-dev
-pip install -r requirements.txt
 ```
 
 Then, install OSMnx and it dependencies using pip:
 ```
 pip install -r requirements.txt
 ```
+Note: if the Shapely installation fails, you may need to install libgeos manually. Following the answer to [this post](https://stackoverflow.com/questions/19742406/could-not-find-library-geos-c-or-load-any-of-its-variants)), type:
 
+```
+sudo apt-get install libgeos-dev
+```
 
-## Create your Building Network
-
+## Launch the app
 - Run app.R, RStudio  will launch.
 - Click **run App**. It is then advised to open the app in your browser (click **Open in browser**).
+
+Alternatively, you can launch the app directly from your console with the following command:
+```
+R -e "shiny::runApp('~/buildings_network_app/app.R')"
+```
+(substitute `~/buildings_network_app/` with your path to the app, if you haven't cloned `buildings_network_app` to your `home/` folder).
+
+## Create your Building Network
 -  You can give your job a name using the **Job name** field. The default job name is *BuildingsNetwork*.
 - Move the blue square in the map to select the area of interest and click the button **Run**. Alternatively, you can directly insert the geographical coordinates of the center of your are of interest in the (Latitude, Longitude) boxes and click the button **Run**. It is also possible to search for places by clicking on the magnifying glass icon in the map.
  
