@@ -11,11 +11,12 @@ First, you need to install R (and RStudio). The following R packages have to be 
 
 You can istall them by typing 
 
-``
+```
 install.packages("shiny", dependencies = TRUE)
 install.packages("leaflet", dependencies = TRUE)
 install.packages("comprehenr", dependencies = TRUE)
-``
+install.packages("markdown", dependencies = TRUE)
+```
 
 in the R console.
 
@@ -55,20 +56,26 @@ please note that [rtree](https://pypi.org/project/Rtree/) requires the [libspati
 
 ### In MacOS or Linux:
 
-In MacOS or Linux, the app uses a Python virtual environment .env. First, you need to create the virtual environment and activate it:
+In MacOS or Linux, the app uses a Python 3.6 virtual environment .env. First, you need to create the virtual environment and activate it:
 
 ```
-pip install virtualenv
-python2 -m venv .env
+pip3 install virtualenv
+python3 -m virtualenv .env
 source .env/bin/activate
 ```
 
-and then, install OSMnx and it dependencies using pip:
+Please note that the OSMnx dependency [rtree](https://pypi.org/project/Rtree/) requires the [libspatialindex](https://libspatialindex.org/) library, that is not installed authomatically. If you don't have it installed, please run:
 
+```
+sudo apt-get install libspatialindex-dev
+pip install -r requirements.txt
+```
+
+Then, install OSMnx and it dependencies using pip:
 ```
 pip install -r requirements.txt
 ```
-please note that the dependency [rtree](https://pypi.org/project/Rtree/) requires the [libspatialindex](https://libspatialindex.org/) library. If you don't have it installed, please follow the instructions [here](https://github.com/libspatialindex/libspatialindex/wiki/1.-Getting-Started).
+
 
 ## Create your Building Network
 
