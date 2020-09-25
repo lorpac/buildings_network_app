@@ -6,6 +6,7 @@ An R Shiny app that allows creating the Building Network of a 2km x 2km square a
 First, you need to install R (and RStudio). The following R packages have to be installed:
 - shiny
 - leaflet
+- leaflet.extras
 - comprehenr
 - markdown
 
@@ -14,6 +15,7 @@ You can istall them by typing
 ```
 install.packages("shiny", dependencies = TRUE)
 install.packages("leaflet", dependencies = TRUE)
+install.packages("leaflet.extras", dependencies = TRUE)
 install.packages("comprehenr", dependencies = TRUE)
 install.packages("markdown", dependencies = TRUE)
 ```
