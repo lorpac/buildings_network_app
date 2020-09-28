@@ -5,5 +5,4 @@ param(
 echo $lat
 echo $lng
 
-conda activate cityenv
 python main.py "$lat" "$lng"

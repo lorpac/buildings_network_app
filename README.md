@@ -3,7 +3,9 @@
 An R Shiny app that allows creating the Building Network of a 2km x 2km square area of any city, around a user-defined geographical point. 
 
 ## Requirements and installation
-First, you need to install R (and RStudio). The following R packages have to be installed:
+First, you need to install [R](https://cran.r-project.org/) (and optionally [RStudio](https://rstudio.com/products/rstudio/download/)).
+
+ The following R packages have to be installed:
 - shiny
 - leaflet
 - leaflet.extras
@@ -22,17 +24,26 @@ install.packages("markdown", dependencies = TRUE)
 
 in the R console.
 
-The calculations are done in Python. You need to install Python (version 3.x) and install the required packages (essentially, [OSMnx](https://github.com/gboeing/osmnx) with its dependencies, see below). 
-### Installation on Windows
-Due to geopandas installation requirement, installing with conda is required on Windows.
+The calculations are done in Python. You need to install Python (version 3.x) and install the required packages (essentially, [OSMnx](https://github.com/gboeing/osmnx) with its dependencies, see below).
 
-In Windows, it is assumed that you are working in a conda virtual environment named cityenv . In order to do so, run:
-
+### Optional - Use a virtual environment
+#### Windows
+Due to geopandas installation requirement, installing with conda is required on Windows. We thus use a conda virtual environment.
 ```
 conda env create -n cityenv
 conda activate cityenv
-conda install pip
 ```
+
+#### MacOS or Linux:
+```
+pip3 install virtualenv
+python3 -m virtualenv .env
+source .env/bin/activate
+```
+
+
+### Installation on Windows
+Due to geopandas installation requirement, installing with conda is required on Windows.
 
 Install OSMnx dependencies:
 
@@ -48,9 +59,10 @@ conda install rtree
 conda install shapely
 ```
 
-and install OSMnx:
+and install OSMnx with `pip`:
 
 ```
+conda install pip
 pip install osmnx
 ```
 please note that [rtree](https://pypi.org/project/Rtree/) requires the [libspatialindex](https://libspatialindex.org/) library. If you don't have it installed, please follow the instructions [here](https://github.com/libspatialindex/libspatialindex/wiki/1.-Getting-Started).
@@ -58,33 +70,25 @@ please note that [rtree](https://pypi.org/project/Rtree/) requires the [libspati
 
 ### In MacOS or Linux:
 
-In MacOS or Linux, the app uses a Python 3.6 virtual environment .env. First, you need to create the virtual environment and activate it:
-
-```
-pip3 install virtualenv
-python3 -m virtualenv .env
-source .env/bin/activate
-```
-
-Note: if you get a `ModuleNotFoundError`, try `python3 -m venv .env`.
-
-Please note that the OSMnx dependency [rtree](https://pypi.org/project/Rtree/) requires the [libspatialindex](https://libspatialindex.org/) library, that is not installed authomatically. If you don't have it installed, please run:
+The OSMnx dependency [rtree](https://pypi.org/project/Rtree/) requires the [libspatialindex](https://libspatialindex.org/) library, that is not installed automatically. If you don't have it installed, please run:
 
 ```
 sudo apt-get install libspatialindex-dev
+```
+You also need to install libgeos, that is required by Shapely. You can do so with:
+
+```
+sudo apt-get install libgeos-dev
 ```
 
 Then, install OSMnx and it dependencies using pip:
 ```
 pip install -r requirements.txt
 ```
-Note: if the Shapely installation fails, you may need to install libgeos manually. Following the answer to [this post](https://stackoverflow.com/questions/19742406/could-not-find-library-geos-c-or-load-any-of-its-variants)), type:
-
-```
-sudo apt-get install libgeos-dev
-```
 
 ## Launch the app
+
+If you use [RStudio](https://rstudio.com/products/rstudio/download/):
 - Run app.R, RStudio  will launch.
 - Click **run App**. It is then advised to open the app in your browser (click **Open in browser**).
 
@@ -112,4 +116,3 @@ Lorenza Pacini - [lorpac](https://github.com/lorpac)
 ### Known issues (work in progress!)
 
 - The blue square in the map is deformed at latitudes far from the European latitude. However, this does not impact the shape of the area that is actually considered for the creation of the Buildings Network, it remains a 2km x 2km squared area centered around the center of the (deformed) square.
-- On Linux, the results are plotted only when the whole computation has finished. 
