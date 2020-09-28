@@ -306,11 +306,6 @@ server <- function(input, output, session) {
           file.copy(f, destination_folder)
         }
         
-        cat(
-          paste(input$lat, input$long, sep = "\n"),
-          file = file.path(destination_folder, "coords.txt")
-        )
-        
       }
       
       Sys.sleep(3)
@@ -338,14 +333,7 @@ server <- function(input, output, session) {
                isolate(rv$lng))
       
       system2("bash", args, wait = FALSE)
-    } # not working with wait=FALSE
-    
-    
-    # args = c( "main.py",
-    #          toString(isolate(rv$lat)),
-    #          toString(isolate(rv$lng)))
-    # system2(".env/bin/python", args, wait=TRUE) # can't execute binary file
-    
+    }
     
     
   }
@@ -355,9 +343,6 @@ server <- function(input, output, session) {
     paste(rv$folder_name, "tar", sep = ".")
   },
   
-  # content <- function(file) {
-  #   tar(file, rv$file_paths)
-  # }
   content <- function(file) {
     tar(file, imgs_folder)
   })
